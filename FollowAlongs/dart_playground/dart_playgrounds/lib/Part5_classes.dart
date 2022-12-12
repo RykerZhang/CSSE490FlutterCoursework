@@ -16,6 +16,11 @@ class DoublePoint {
     this.y = y * 2.0;
   }
 
+  DoublePoint.empty() {
+    this.x = 0;
+    this.y = 0;
+  }
+
   @override
   String toString() {
     return "(${this.x}, ${this.y})";
