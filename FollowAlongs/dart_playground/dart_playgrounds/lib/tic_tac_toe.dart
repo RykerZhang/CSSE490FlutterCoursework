@@ -70,6 +70,7 @@ class MyTicTacToeGame {
           .contains([TicTacToeMark.o, TicTacToeMark.o, TicTacToeMark.o])) {
         turn = TicTacToeState.oWon;
       }
+      //add the tie condition
     }
   }
 }
