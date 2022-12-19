@@ -95,7 +95,7 @@ void devUnitTest() {
 
 void main() {
   print('Testing Tictactoe game');
-  devUnitTest();
+  devWithPrint();
 }
 
 void devWithPrint() {

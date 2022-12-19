@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 import 'Tic_Tac_Toe_Game.dart';
 
@@ -65,14 +66,19 @@ class _MyHomePageState extends State<MyHomePage> {
     for (var k = 0; k < 9; k++) {
       squareButtons.add(
         ElevatedButton(
-          onPressed: () {
-            print("You pressed button number $k");
-          },
-          child: Text(
-            "x",
-            style: TextStyle(fontSize: 90),
-          ),
-        ),
+            onPressed: () {
+              print("You pressed button number $k");
+              setState(() {
+                game.pressedSquare(k);
+              });
+              print("newState == $game ");
+            },
+            child: Text(
+              (game.board[k] == TicTacToeMark.x)
+                  ? "x"
+                  : ((game.board[k] == TicTacToeMark.o) ? "O" : " "),
+              style: TextStyle(fontSize: 90),
+            )),
       );
     }
 
@@ -82,27 +88,51 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Colors.red,
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              gameStateString,
-              style: Theme.of(context).textTheme.headline4,
-            ),
-            Expanded(
-              child: GridView.count(
-                primary: false,
-                physics: const NeverScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(20),
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-                crossAxisCount: 3,
-                children: squareButtons,
+        child: Container(
+          constraints: BoxConstraints(maxWidth: 500),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text(
+                gameStateString,
+                style: Theme.of(context).textTheme.headline4,
               ),
-            )
-          ],
+              Flexible(
+                fit: FlexFit.tight,
+                child: Container(
+                  constraints: BoxConstraints(maxWidth: 500),
+                  child: GridView.count(
+                    primary: false,
+                    physics: const NeverScrollableScrollPhysics(),
+                    padding: const EdgeInsets.all(20),
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10,
+                    crossAxisCount: 3,
+                    children: squareButtons,
+                  ),
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      print("You pressed new game.");
+                      setState(() {
+                        game = TicTacToeGame();
+                      });
+                    },
+                    child: const Text('New Game',
+                        style: TextStyle(fontSize: 30.0)),
+                  ),
+                  SizedBox(width: 28)
+                ],
+              ),
+            ],
+          ),
         ),
       ),
+
       // This trailing comma makes auto-formatting nicer for build methods.
     );
   }

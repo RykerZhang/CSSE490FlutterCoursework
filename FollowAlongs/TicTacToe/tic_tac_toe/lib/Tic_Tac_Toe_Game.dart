@@ -20,6 +20,7 @@ class TicTacToeGame {
   void pressedSquare(int index) {
     if (board[index] != TicTacToeMark.none) {
       print("This spot is not empty.");
+      return;
     }
 
     if (state == TicTacToeState.xTurn) {
