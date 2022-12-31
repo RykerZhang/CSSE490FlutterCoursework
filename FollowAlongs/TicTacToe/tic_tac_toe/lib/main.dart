@@ -62,24 +62,37 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final squareButtons = <ElevatedButton>[];
+    final squareButtons = <Widget>[];
     for (var k = 0; k < 9; k++) {
-      squareButtons.add(
-        ElevatedButton(
-            onPressed: () {
-              print("You pressed button number $k");
-              setState(() {
-                game.pressedSquare(k);
-              });
-              print("newState == $game ");
-            },
-            child: Text(
-              (game.board[k] == TicTacToeMark.x)
-                  ? "x"
-                  : ((game.board[k] == TicTacToeMark.o) ? "O" : " "),
-              style: TextStyle(fontSize: 90),
-            )),
-      );
+      var filename = "blank.png";
+      if (game.board[k] == TicTacToeMark.x) {
+        filename = "x.png";
+      } else if (game.board[k] == TicTacToeMark.o) {
+        filename = "o.png";
+      }
+      squareButtons.add(InkWell(
+              onTap: () {
+                print("You clicked $k");
+                setState(() {
+                  game.pressedSquare(k);
+                });
+              },
+              child: Image.asset("images/$filename"))
+          // ElevatedButton(
+          //     onPressed: () {
+          //       print("You pressed button number $k");
+          //       setState(() {
+          //         game.pressedSquare(k);
+          //       });
+          //       print("newState == $game ");
+          //     },
+          //     child: Text(
+          //       (game.board[k] == TicTacToeMark.x)
+          //           ? "x"
+          //           : ((game.board[k] == TicTacToeMark.o) ? "O" : " "),
+          //       style: TextStyle(fontSize: 90),
+          //     )),
+          );
     }
 
     return Scaffold(
@@ -95,20 +108,29 @@ class _MyHomePageState extends State<MyHomePage> {
             children: <Widget>[
               Text(
                 gameStateString,
-                style: Theme.of(context).textTheme.headline4,
+                style: Theme.of(context).textTheme.headline3,
+              ),
+              SizedBox(
+                height: 15.0,
               ),
               Flexible(
                 fit: FlexFit.tight,
                 child: Container(
                   constraints: BoxConstraints(maxWidth: 500),
-                  child: GridView.count(
-                    primary: false,
-                    physics: const NeverScrollableScrollPhysics(),
-                    padding: const EdgeInsets.all(20),
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
-                    crossAxisCount: 3,
-                    children: squareButtons,
+                  child: Stack(
+                    //fit: StackFit.expand,
+                    children: [
+                      Image.asset("images/board.png"),
+                      GridView.count(
+                        primary: false,
+                        physics: const NeverScrollableScrollPhysics(),
+                        padding: const EdgeInsets.all(20),
+                        crossAxisSpacing: 50,
+                        mainAxisSpacing: 50,
+                        crossAxisCount: 3,
+                        children: squareButtons,
+                      ),
+                    ],
                   ),
                 ),
               ),
