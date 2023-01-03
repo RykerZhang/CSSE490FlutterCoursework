@@ -50,6 +50,10 @@ class LinearLightsOutGame {
   }
 
   void pressLight(int index) {
+    if ((state == LightsState.allOff) || (state == LightsState.allOn)) {
+      print("Game end");
+      return;
+    }
     //if index is 0:
     if (index == 0) {
       Lightswitch(0);
@@ -68,7 +72,7 @@ class LinearLightsOutGame {
   void checkEnd() {
     if (checkAllOff() == true) {
       state = LightsState.allOff;
-    } else if (checkAllOn() == false) {
+    } else if (checkAllOn() == true) {
       state = LightsState.allOn;
     } else {
       state = LightsState.inGame;
