@@ -32,26 +32,27 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   var game = LinearLightsOutGame();
 
-  String getPic(int i) {
-    if (game.board[i] == LightsMark.off) {
-      return "assets/images/Off.png";
-    } else {
-      return "assets/images/On.png";
-    }
-  }
+  // String getPic(int i) {
+  //   if (game.board[i] == LightsMark.off) {
+  //     return "assets/images/Off.png";
+  //   } else {
+  //     return "assets/images/On.png";
+  //   }
+  // }
 
   String get gameStateString {
     switch (game.state) {
       case LightsState.allOff:
         int count = game.pressCount;
-        return "All OFF in $count times";
+        return "You won in $count times!";
         break;
       case LightsState.allOn:
         int count = game.pressCount;
-        return "All ON. in $count times";
+        return "You won in $count times!";
         break;
       case LightsState.inGame:
-        return "Please Continue ";
+        int count = game.pressCount;
+        return "Num of moves: $count";
         break;
     }
   }
@@ -80,9 +81,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 left: (MediaQuery.of(context).size.width) / 2 - 180,
                 child: IconButton(
                   icon: (game.board[0] == LightsMark.off)
-                      ? Image.asset("assets/images/Off.png")
-                      : Image.asset("assets/images/On.png"),
-                  iconSize: 50,
+                      ? Image.asset("assets/images/light_off.png")
+                      : Image.asset("assets/images/light_on.png"),
+                  iconSize: 75,
                   onPressed: () {
                     setState(() {
                       game.pressLight(0);
@@ -97,9 +98,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 left: (MediaQuery.of(context).size.width) / 2 - 180,
                 child: IconButton(
                   icon: (game.board[1] == LightsMark.off)
-                      ? Image.asset("assets/images/Off.png")
-                      : Image.asset("assets/images/On.png"),
-                  iconSize: 50,
+                      ? Image.asset("assets/images/light_off.png")
+                      : Image.asset("assets/images/light_on.png"),
+                  iconSize: 75,
                   onPressed: () {
                     setState(() {
                       game.pressLight(1);
@@ -114,9 +115,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 left: (MediaQuery.of(context).size.width) / 2 - 180,
                 child: IconButton(
                   icon: (game.board[2] == LightsMark.off)
-                      ? Image.asset("assets/images/Off.png")
-                      : Image.asset("assets/images/On.png"),
-                  iconSize: 50,
+                      ? Image.asset("assets/images/light_off.png")
+                      : Image.asset("assets/images/light_on.png"),
+                  iconSize: 75,
                   onPressed: () {
                     setState(() {
                       game.pressLight(2);
@@ -131,9 +132,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 left: (MediaQuery.of(context).size.width) / 2 - 180,
                 child: IconButton(
                   icon: (game.board[3] == LightsMark.off)
-                      ? Image.asset("assets/images/Off.png")
-                      : Image.asset("assets/images/On.png"),
-                  iconSize: 50,
+                      ? Image.asset("assets/images/light_off.png")
+                      : Image.asset("assets/images/light_on.png"),
+                  iconSize: 75,
                   onPressed: () {
                     setState(() {
                       game.pressLight(3);
@@ -148,9 +149,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 left: (MediaQuery.of(context).size.width) / 2 - 180,
                 child: IconButton(
                   icon: (game.board[4] == LightsMark.off)
-                      ? Image.asset("assets/images/Off.png")
-                      : Image.asset("assets/images/On.png"),
-                  iconSize: 50,
+                      ? Image.asset("assets/images/light_off.png")
+                      : Image.asset("assets/images/light_on.png"),
+                  iconSize: 75,
                   onPressed: () {
                     setState(() {
                       game.pressLight(4);
@@ -165,9 +166,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 left: (MediaQuery.of(context).size.width) / 2 - 180,
                 child: IconButton(
                   icon: (game.board[5] == LightsMark.off)
-                      ? Image.asset("assets/images/Off.png")
-                      : Image.asset("assets/images/On.png"),
-                  iconSize: 50,
+                      ? Image.asset("assets/images/light_off.png")
+                      : Image.asset("assets/images/light_on.png"),
+                  iconSize: 75,
                   onPressed: () {
                     setState(() {
                       game.pressLight(5);
@@ -182,9 +183,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 left: (MediaQuery.of(context).size.width) / 2 - 40,
                 child: IconButton(
                   icon: (game.board[6] == LightsMark.off)
-                      ? Image.asset("assets/images/Off.png")
-                      : Image.asset("assets/images/On.png"),
-                  iconSize: 50,
+                      ? Image.asset("assets/images/light_off.png")
+                      : Image.asset("assets/images/light_on.png"),
+                  iconSize: 75,
                   onPressed: () {
                     setState(() {
                       game.pressLight(6);
@@ -199,9 +200,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 left: (MediaQuery.of(context).size.width) / 2 + 70,
                 child: IconButton(
                   icon: (game.board[7] == LightsMark.off)
-                      ? Image.asset("assets/images/Off.png")
-                      : Image.asset("assets/images/On.png"),
-                  iconSize: 50,
+                      ? Image.asset("assets/images/light_off.png")
+                      : Image.asset("assets/images/light_on.png"),
+                  iconSize: 75,
                   onPressed: () {
                     setState(() {
                       game.pressLight(7);
@@ -216,9 +217,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 left: (MediaQuery.of(context).size.width) / 2 + 90,
                 child: IconButton(
                   icon: (game.board[8] == LightsMark.off)
-                      ? Image.asset("assets/images/Off.png")
-                      : Image.asset("assets/images/On.png"),
-                  iconSize: 50,
+                      ? Image.asset("assets/images/light_off.png")
+                      : Image.asset("assets/images/light_on.png"),
+                  iconSize: 75,
                   onPressed: () {
                     setState(() {
                       game.pressLight(8);
@@ -233,9 +234,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 left: (MediaQuery.of(context).size.width) / 2 + 70,
                 child: IconButton(
                   icon: (game.board[9] == LightsMark.off)
-                      ? Image.asset("assets/images/Off.png")
-                      : Image.asset("assets/images/On.png"),
-                  iconSize: 50,
+                      ? Image.asset("assets/images/light_off.png")
+                      : Image.asset("assets/images/light_on.png"),
+                  iconSize: 75,
                   onPressed: () {
                     setState(() {
                       game.pressLight(9);
@@ -250,9 +251,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 left: (MediaQuery.of(context).size.width) / 2 - 40,
                 child: IconButton(
                   icon: (game.board[10] == LightsMark.off)
-                      ? Image.asset("assets/images/Off.png")
-                      : Image.asset("assets/images/On.png"),
-                  iconSize: 50,
+                      ? Image.asset("assets/images/light_off.png")
+                      : Image.asset("assets/images/light_on.png"),
+                  iconSize: 75,
                   onPressed: () {
                     setState(() {
                       game.pressLight(10);
@@ -264,12 +265,12 @@ class _MyHomePageState extends State<MyHomePage> {
               //button 11
               Positioned(
                 top: 450,
-                left: (MediaQuery.of(context).size.width) / 2,
+                left: (MediaQuery.of(context).size.width) / 2 + 20,
                 child: IconButton(
                   icon: (game.board[11] == LightsMark.off)
-                      ? Image.asset("assets/images/Off.png")
-                      : Image.asset("assets/images/On.png"),
-                  iconSize: 50,
+                      ? Image.asset("assets/images/light_off.png")
+                      : Image.asset("assets/images/light_on.png"),
+                  iconSize: 75,
                   onPressed: () {
                     setState(() {
                       game.pressLight(11);
@@ -284,9 +285,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 left: (MediaQuery.of(context).size.width) / 2 + 100,
                 child: IconButton(
                   icon: (game.board[12] == LightsMark.off)
-                      ? Image.asset("assets/images/Off.png")
-                      : Image.asset("assets/images/On.png"),
-                  iconSize: 50,
+                      ? Image.asset("assets/images/light_off.png")
+                      : Image.asset("assets/images/light_on.png"),
+                  iconSize: 75,
                   onPressed: () {
                     setState(() {
                       game.pressLight(12);
