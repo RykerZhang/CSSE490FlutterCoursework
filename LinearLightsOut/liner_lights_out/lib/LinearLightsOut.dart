@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:test/test.dart';
 
 enum LightsMark {
   on,
@@ -25,7 +26,7 @@ LightsMark get randomMark {
 class LinearLightsOutGame {
   int pressCount = 0;
   LightsState state = LightsState.inGame;
-  final List<LightsMark> board = [
+  late List<LightsMark> board = [
     randomMark,
     randomMark,
     randomMark,
@@ -50,7 +51,7 @@ class LinearLightsOutGame {
   }
 
   void pressLight(int index) {
-    if ((state == LightsState.allOff) || (state == LightsState.allOn)) {
+    if ((state == LightsState.allOff)) {
       print("Game end");
       return;
     }
@@ -96,4 +97,40 @@ class LinearLightsOutGame {
     }
     return true;
   }
+}
+
+void main() {
+  LinearLightsOutGame game = new LinearLightsOutGame();
+  game.board = [
+    LightsMark.off,
+    LightsMark.off,
+    LightsMark.off,
+    LightsMark.off,
+    LightsMark.off,
+    LightsMark.off,
+    LightsMark.off,
+    LightsMark.off,
+    LightsMark.off,
+    LightsMark.off,
+    LightsMark.on,
+    LightsMark.on,
+    LightsMark.on
+  ];
+
+  test('Initial game board', () {
+    expect(game.state, equals(LightsState.inGame));
+    expect(game.board.length, equals(13));
+    expect(
+        game.board[0],
+        equals(
+          LightsMark.off,
+        ));
+    expect(game.board[12], equals(LightsMark.on));
+  });
+
+  test('Press Button 11', () {
+    game.pressLight(11);
+    expect(game.state, equals(LightsState.allOff));
+    expect(game.board[12], equals(LightsMark.off));
+  });
 }

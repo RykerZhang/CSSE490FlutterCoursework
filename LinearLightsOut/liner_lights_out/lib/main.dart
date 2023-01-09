@@ -48,7 +48,7 @@ class _MyHomePageState extends State<MyHomePage> {
         break;
       case LightsState.allOn:
         int count = game.pressCount;
-        return "You won in $count times!";
+        return "Num of moves: $count";
         break;
       case LightsState.inGame:
         int count = game.pressCount;
