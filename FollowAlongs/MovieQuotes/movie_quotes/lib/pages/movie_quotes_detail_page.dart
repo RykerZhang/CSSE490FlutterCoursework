@@ -1,9 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:movie_quotes/managers/movie_qutoe_document_manager.dart';
+import 'package:movie_quotes/managers/movie_qutoes_collection_manager.dart';
 import 'package:movie_quotes/models/movie_quote.dart';
 
 class MovieQuoteDetailPage extends StatefulWidget {
-  final MovieQuote mq;
-  const MovieQuoteDetailPage(this.mq, {super.key});
+  // final MovieQuote mq;
+  final String documentId;
+  const MovieQuoteDetailPage(this.documentId, {super.key});
 
   @override
   State<MovieQuoteDetailPage> createState() => _MovieQuoteDetailPageState();
@@ -13,10 +18,25 @@ class _MovieQuoteDetailPageState extends State<MovieQuoteDetailPage> {
   final quoteTextController = TextEditingController();
   final movieTextController = TextEditingController();
 
+  StreamSubscription? movieQuoteSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+
+    movieQuoteSubscription = MovieQuoteDocumentManager.instance.startListening(
+      widget.documentId,
+      () {
+        setState(() {});
+      },
+    );
+  }
+
   @override
   void dispose() {
     quoteTextController.dispose();
     movieTextController.dispose();
+    MovieQuoteDocumentManager.instance.stopListening(movieQuoteSubscription!);
     super.dispose();
   }
 
@@ -28,15 +48,34 @@ class _MovieQuoteDetailPageState extends State<MovieQuoteDetailPage> {
         actions: [
           IconButton(
             onPressed: () {
-              showEditQuoteDialog(context);
               print("You clicked Edit!");
+              showEditQuoteDialog(context);
             },
             icon: const Icon(Icons.edit),
           ),
           IconButton(
             onPressed: () {
-              print("You clicked Delete!");
-              //  HW - make a SnackBar
+              final justDeletedQuote =
+                  MovieQuoteDocumentManager.instance.latesMovieQuote!.quote;
+              final justDeleteMovie =
+                  MovieQuoteDocumentManager.instance.latesMovieQuote!.movie;
+
+              MovieQuoteDocumentManager.instance.delete();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: const Text('Quote Deleted'),
+                  action: SnackBarAction(
+                    label: 'Undo',
+                    onPressed: () {
+                      MovieQuotesCollectionManager.instance.add(
+                        quote: justDeletedQuote,
+                        movie: justDeleteMovie,
+                      );
+                      print("TODO: Figure out UNDO");
+                    },
+                  ),
+                ),
+              );
               Navigator.pop(context);
             },
             icon: const Icon(Icons.delete),
@@ -53,12 +92,16 @@ class _MovieQuoteDetailPageState extends State<MovieQuoteDetailPage> {
           children: [
             LabelledTextDisplay(
               title: "Quote:",
-              content: widget.mq.quote,
+              content:
+                  MovieQuoteDocumentManager.instance.latesMovieQuote?.quote ??
+                      "",
               iconData: Icons.format_quote_outlined,
             ),
             LabelledTextDisplay(
               title: "Movie:",
-              content: widget.mq.movie,
+              content:
+                  MovieQuoteDocumentManager.instance.latesMovieQuote?.movie ??
+                      "",
               iconData: Icons.movie_filter_outlined,
             ),
           ],
@@ -68,37 +111,39 @@ class _MovieQuoteDetailPageState extends State<MovieQuoteDetailPage> {
   }
 
   Future<void> showEditQuoteDialog(BuildContext context) {
-    quoteTextController.text = widget.mq.quote;
-    movieTextController.text = widget.mq.movie;
+    quoteTextController.text =
+        MovieQuoteDocumentManager.instance.latesMovieQuote?.quote ?? "";
+    movieTextController.text =
+        MovieQuoteDocumentManager.instance.latesMovieQuote?.movie ?? "";
 
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Edit the movie'),
+          title: const Text('Edit this Movie Quote'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Padding(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 4.0),
                 child: TextFormField(
                   controller: quoteTextController,
                   decoration: const InputDecoration(
                     border: UnderlineInputBorder(),
-                    labelText: 'Quote',
+                    labelText: 'Quote:',
                   ),
                 ),
               ),
               Padding(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 4.0),
                 child: TextFormField(
                   controller: movieTextController,
                   decoration: const InputDecoration(
                     border: UnderlineInputBorder(),
-                    labelText: 'Movie',
+                    labelText: 'Movie:',
                   ),
                 ),
               ),
@@ -118,15 +163,27 @@ class _MovieQuoteDetailPageState extends State<MovieQuoteDetailPage> {
               style: TextButton.styleFrom(
                 textStyle: Theme.of(context).textTheme.labelLarge,
               ),
-              child: const Text('Edit'),
+              child: const Text('Update'),
               onPressed: () {
                 setState(() {
-                  widget.mq.movie = movieTextController.text;
-                  widget.mq.quote = quoteTextController.text;
+                  // TODO: Figure out update in the Firestore
+
+                  // widget.mq.quote = quoteTextController.text;
+                  // widget.mq.movie = movieTextController.text;
+
+                  // quotes.add(
+                  //   MovieQuote(
+                  //     quote: quoteTextController.text,
+                  //     movie: movieTextController.text,
+                  //   ),
+                  // );
+                  MovieQuoteDocumentManager.instance.update(
+                    movie: movieTextController.text,
+                    quote: quoteTextController.text,
+                  );
                   quoteTextController.text = "";
                   movieTextController.text = "";
                 });
-                //TODO: Actually Create the Quote
                 Navigator.of(context).pop();
               },
             ),

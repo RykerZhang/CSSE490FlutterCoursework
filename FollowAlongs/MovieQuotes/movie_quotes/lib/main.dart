@@ -20,7 +20,9 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MovieQuoteListPage(),
+      home: const MovieQuotesListPage(),
     );
   }
 }
+
+//To host: use "firebase init", choose host, put in "build/web", then do "flutter build web", then do "firebase deploy"

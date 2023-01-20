@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
@@ -5,68 +7,68 @@ import 'package:movie_quotes/components/movie_quote_row_component.dart';
 import 'package:movie_quotes/main.dart';
 import 'package:movie_quotes/pages/movie_quotes_detail_page.dart';
 
+import '../managers/movie_qutoes_collection_manager.dart';
 import '../models/movie_quote.dart';
 
-class MovieQuoteListPage extends StatefulWidget {
-  const MovieQuoteListPage({super.key});
+class MovieQuotesListPage extends StatefulWidget {
+  const MovieQuotesListPage({super.key});
 
   @override
-  State<MovieQuoteListPage> createState() => _MovieQuoteListPageState();
+  State<MovieQuotesListPage> createState() => _MovieQuotesListPageState();
 }
 
-class _MovieQuoteListPageState extends State<MovieQuoteListPage> {
-  final quotes = <MovieQuote>[];
+class _MovieQuotesListPageState extends State<MovieQuotesListPage> {
+  final quotes = <MovieQuote>[]; // Later we will remove this and use Firestore
   final quoteTextController = TextEditingController();
   final movieTextController = TextEditingController();
+
+  StreamSubscription? movieQuotesSubscription;
+
   @override
   void initState() {
     super.initState();
-    quotes.add(
-      MovieQuote(quote: "quote1", movie: "Movie1"),
-    );
-    quotes.add(
-      MovieQuote(quote: "quote2", movie: "Movie3"),
-    );
+
+    movieQuotesSubscription =
+        MovieQuotesCollectionManager.instance.startListening(() {
+      setState(() {});
+    });
   }
 
   @override
   void dispose() {
     quoteTextController.dispose();
     movieTextController.dispose();
+    MovieQuotesCollectionManager.instance
+        .stopListening(movieQuotesSubscription!);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // final List<MovieQuoteRow> movieRows = [];
-    // for (final movieQuote in quotes) {
-    //   movieRows.add(MovieQuoteRow(movieQuote));
-    // }
-
-    //the same as the for loop
-    final List<MovieQuoteRow> movieRows = quotes
-        .map((mq) => MovieQuoteRow(
-              movieQuote: mq,
-              onTap: () async {
-                print(
-                    "You clicked on the movie quote ${mq.quote} - ${mq.movie}");
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (BuildContext context) {
-                      return MovieQuoteDetailPage(
-                          mq); // In Firebase use a documentId
-                    },
-                  ),
-                );
-                setState(() {});
-              },
-            ))
-        .toList();
+    final List<MovieQuoteRow> movieRows =
+        MovieQuotesCollectionManager.instance.latestMovieQuotes
+            .map((mq) => MovieQuoteRow(
+                  movieQuote: mq,
+                  onTap: () async {
+                    print(
+                        "You clicked on the movie quote ${mq.quote} - ${mq.movie}");
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (BuildContext context) {
+                          return MovieQuoteDetailPage(
+                              mq.documentId!); // In Firebase use a documentId
+                        },
+                      ),
+                    );
+                    setState(() {});
+                  },
+                ))
+            .toList();
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Movie Quote"),
+        title: const Text("Movie Quotes"),
       ),
       backgroundColor: Colors.grey[100],
       body: ListView(
@@ -87,14 +89,14 @@ class _MovieQuoteListPageState extends State<MovieQuoteListPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Create a movie quote'),
+          title: const Text('Create a Movie Quote'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Padding(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 4.0),
                 child: TextFormField(
                   controller: quoteTextController,
                   decoration: const InputDecoration(
@@ -105,7 +107,7 @@ class _MovieQuoteListPageState extends State<MovieQuoteListPage> {
               ),
               Padding(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 4.0),
                 child: TextFormField(
                   controller: movieTextController,
                   decoration: const InputDecoration(
@@ -133,15 +135,13 @@ class _MovieQuoteListPageState extends State<MovieQuoteListPage> {
               child: const Text('Create'),
               onPressed: () {
                 setState(() {
-                  quotes.add(
-                    MovieQuote(
-                        quote: quoteTextController.text,
-                        movie: movieTextController.text),
+                  MovieQuotesCollectionManager.instance.add(
+                    quote: quoteTextController.text,
+                    movie: movieTextController.text,
                   );
                   quoteTextController.text = "";
                   movieTextController.text = "";
                 });
-                //TODO: Actually Create the Quote
                 Navigator.of(context).pop();
               },
             ),
