@@ -26,16 +26,14 @@ class MovieQuotesCollectionManager {
     });
   }
 
-  void stopListening(StreamSubscription subscription) {
-    subscription.cancel();
+  void stopListening(StreamSubscription? subscription) {
+    subscription?.cancel();
   }
 
-  //TODO: make a stop listening
   Future<void> add({
     required String quote,
     required String movie,
   }) {
-    //     // Call the user's CollectionReference to add a new user
     return _ref
         .add({
           kMovieQuote_quote: quote,

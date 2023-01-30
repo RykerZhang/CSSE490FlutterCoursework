@@ -1,14 +1,12 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/container.dart';
-import 'package:flutter/src/widgets/framework.dart';
+import 'package:movie_quotes/components/list_page_side_drawer.dart';
 import 'package:movie_quotes/components/movie_quote_row_component.dart';
-import 'package:movie_quotes/main.dart';
-import 'package:movie_quotes/pages/movie_quotes_detail_page.dart';
-
+import 'package:movie_quotes/models/movie_quote.dart';
 import '../managers/movie_qutoes_collection_manager.dart';
-import '../models/movie_quote.dart';
+import '../models/auth_manager.dart';
+import 'login_front_page.dart';
+import 'movie_quotes_detail_page.dart';
 
 class MovieQuotesListPage extends StatefulWidget {
   const MovieQuotesListPage({super.key});
@@ -18,11 +16,14 @@ class MovieQuotesListPage extends StatefulWidget {
 }
 
 class _MovieQuotesListPageState extends State<MovieQuotesListPage> {
-  final quotes = <MovieQuote>[]; // Later we will remove this and use Firestore
+  final quotes = <MovieQuote>[];
   final quoteTextController = TextEditingController();
   final movieTextController = TextEditingController();
 
   StreamSubscription? movieQuotesSubscription;
+
+  UniqueKey? _loginObserverKey;
+  UniqueKey? _logoutObserverKey;
 
   @override
   void initState() {
@@ -32,6 +33,14 @@ class _MovieQuotesListPageState extends State<MovieQuotesListPage> {
         MovieQuotesCollectionManager.instance.startListening(() {
       setState(() {});
     });
+
+    _loginObserverKey = AuthManager.instance.addLoginObserver(() {
+      setState(() {});
+    });
+
+    _logoutObserverKey = AuthManager.instance.addLogoutObserver(() {
+      setState(() {});
+    });
   }
 
   @override
@@ -39,7 +48,9 @@ class _MovieQuotesListPageState extends State<MovieQuotesListPage> {
     quoteTextController.dispose();
     movieTextController.dispose();
     MovieQuotesCollectionManager.instance
-        .stopListening(movieQuotesSubscription!);
+        .stopListening(movieQuotesSubscription);
+    AuthManager.instance.removeObserver(_loginObserverKey);
+    AuthManager.instance.removeObserver(_logoutObserverKey);
     super.dispose();
   }
 
@@ -56,8 +67,7 @@ class _MovieQuotesListPageState extends State<MovieQuotesListPage> {
                       context,
                       MaterialPageRoute(
                         builder: (BuildContext context) {
-                          return MovieQuoteDetailPage(
-                              mq.documentId!); // In Firebase use a documentId
+                          return MovieQuoteDetailPage(mq.documentId!);
                         },
                       ),
                     );
@@ -69,11 +79,28 @@ class _MovieQuotesListPageState extends State<MovieQuotesListPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Movie Quotes"),
+        actions: AuthManager.instance.isSignedIn
+            ? null
+            : [
+                IconButton(
+                  onPressed: () {
+                    Navigator.push(context, MaterialPageRoute(
+                      builder: (BuildContext context) {
+                        return const LoginFrontPage();
+                      },
+                    ));
+                  },
+                  tooltip: "Log in",
+                  icon: const Icon(Icons.login),
+                ),
+              ],
       ),
       backgroundColor: Colors.grey[100],
       body: ListView(
         children: movieRows,
       ),
+      drawer:
+          AuthManager.instance.isSignedIn ? const ListPageSideDrawer() : null,
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           showCreateQuoteDialog(context);
