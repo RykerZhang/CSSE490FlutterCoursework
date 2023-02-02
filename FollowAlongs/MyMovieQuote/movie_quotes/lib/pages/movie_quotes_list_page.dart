@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:movie_quotes/components/list_page_side_drawer.dart';
 import 'package:movie_quotes/components/movie_quote_row_component.dart';
@@ -16,7 +17,7 @@ class MovieQuotesListPage extends StatefulWidget {
 }
 
 class _MovieQuotesListPageState extends State<MovieQuotesListPage> {
-  final quotes = <MovieQuote>[];
+  final quotes = <MovieQuote>[]; // Later we will remove this and use Firestore
   final quoteTextController = TextEditingController();
   final movieTextController = TextEditingController();
 
@@ -29,18 +30,41 @@ class _MovieQuotesListPageState extends State<MovieQuotesListPage> {
   void initState() {
     super.initState();
 
-    movieQuotesSubscription =
-        MovieQuotesCollectionManager.instance.startListening(() {
-      setState(() {});
-    });
-
     _loginObserverKey = AuthManager.instance.addLoginObserver(() {
+      movieQuotesSubscription =
+          MovieQuotesCollectionManager.instance.startListening(() {
+        setState(() {});
+      });
+
       setState(() {});
     });
 
     _logoutObserverKey = AuthManager.instance.addLogoutObserver(() {
       setState(() {});
     });
+  }
+
+  void _showAllQuotes() {
+    MovieQuotesCollectionManager.instance
+        .stopListening(movieQuotesSubscription);
+    movieQuotesSubscription =
+        MovieQuotesCollectionManager.instance.startListening(
+      () {
+        setState(() {});
+      },
+    );
+  }
+
+  void _showOnlyMyQuotes() {
+    MovieQuotesCollectionManager.instance
+        .stopListening(movieQuotesSubscription);
+    movieQuotesSubscription =
+        MovieQuotesCollectionManager.instance.startListening(
+      () {
+        setState(() {});
+      },
+      isFilteredForMine: true,
+    );
   }
 
   @override
@@ -67,7 +91,8 @@ class _MovieQuotesListPageState extends State<MovieQuotesListPage> {
                       context,
                       MaterialPageRoute(
                         builder: (BuildContext context) {
-                          return MovieQuoteDetailPage(mq.documentId!);
+                          return MovieQuoteDetailPage(
+                              mq.documentId!); // In Firebase use a documentId
                         },
                       ),
                     );
@@ -99,11 +124,25 @@ class _MovieQuotesListPageState extends State<MovieQuotesListPage> {
       body: ListView(
         children: movieRows,
       ),
-      drawer:
-          AuthManager.instance.isSignedIn ? const ListPageSideDrawer() : null,
+      drawer: AuthManager.instance.isSignedIn
+          ? ListPageSideDrawer(
+              showAllCallback: () {
+                print("MovieQuoteListPage: Callback to Show all quotes");
+                _showAllQuotes();
+              },
+              showOnlyMineCallback: () {
+                print("MovieQuoteListPage: Callback to Show only my quotes");
+                _showOnlyMyQuotes();
+              },
+            )
+          : null,
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          showCreateQuoteDialog(context);
+          if (AuthManager.instance.isSignedIn) {
+            showCreateQuoteDialog(context);
+          } else {
+            showMustLogInDialog(context);
+          }
         },
         tooltip: 'Create',
         child: const Icon(Icons.add),
@@ -170,6 +209,44 @@ class _MovieQuotesListPageState extends State<MovieQuotesListPage> {
                   movieTextController.text = "";
                 });
                 Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> showMustLogInDialog(BuildContext context) {
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Login Required"),
+          content: const Text(
+              "You must be signed in to post.  Would you like to sign in now?"),
+          actions: <Widget>[
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text("Go sign in"),
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.push(context, MaterialPageRoute(
+                  builder: (BuildContext context) {
+                    return const LoginFrontPage();
+                  },
+                ));
               },
             ),
           ],

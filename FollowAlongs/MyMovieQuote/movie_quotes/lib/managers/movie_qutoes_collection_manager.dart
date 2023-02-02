@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../models/auth_manager.dart';
 import '../models/movie_quote.dart';
 
 class MovieQuotesCollectionManager {
@@ -14,11 +15,14 @@ class MovieQuotesCollectionManager {
   MovieQuotesCollectionManager._privateConstructor()
       : _ref = FirebaseFirestore.instance.collection(kMovieQuoteCollectionPath);
 
-  StreamSubscription startListening(Function() observer) {
-    return _ref
-        .orderBy(kMovieQuote_lastTouched, descending: true)
-        .snapshots()
-        .listen((QuerySnapshot querySnapshot) {
+  StreamSubscription startListening(Function() observer,
+      {bool isFilteredForMine = false}) {
+    Query query = _ref;
+    if (isFilteredForMine) {
+      query = query.where(kMovieQuote_authorUid,
+          isEqualTo: AuthManager.instance.uid);
+    }
+    return query.snapshots().listen((QuerySnapshot querySnapshot) {
       print(querySnapshot.docs);
       latestMovieQuotes =
           querySnapshot.docs.map((doc) => MovieQuote.from(doc)).toList();
@@ -36,6 +40,7 @@ class MovieQuotesCollectionManager {
   }) {
     return _ref
         .add({
+          kMovieQuote_authorUid: AuthManager.instance.uid,
           kMovieQuote_quote: quote,
           kMovieQuote_movie: movie,
           kMovieQuote_lastTouched: Timestamp.now(),

@@ -5,8 +5,9 @@ import 'package:movie_quotes/managers/movie_qutoe_document_manager.dart';
 import 'package:movie_quotes/managers/movie_qutoes_collection_manager.dart';
 import 'package:movie_quotes/models/movie_quote.dart';
 
+import '../models/auth_manager.dart';
+
 class MovieQuoteDetailPage extends StatefulWidget {
-  // final MovieQuote mq;
   final String documentId;
   const MovieQuoteDetailPage(this.documentId, {super.key});
 
@@ -42,43 +43,55 @@ class _MovieQuoteDetailPageState extends State<MovieQuoteDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    final bool showEditeDelete =
+        MovieQuoteDocumentManager.instance.latesMovieQuote != null &&
+            AuthManager.instance.uid.isNotEmpty &&
+            AuthManager.instance.uid ==
+                MovieQuoteDocumentManager.instance.latesMovieQuote!.authorUid;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Movie Quotes"),
         actions: [
-          IconButton(
-            onPressed: () {
-              print("You clicked Edit!");
-              showEditQuoteDialog(context);
-            },
-            icon: const Icon(Icons.edit),
+          Visibility(
+            visible: showEditeDelete,
+            child: IconButton(
+              onPressed: () {
+                print("You clicked Edit!");
+                showEditQuoteDialog(context);
+              },
+              icon: const Icon(Icons.edit),
+            ),
           ),
-          IconButton(
-            onPressed: () {
-              final justDeletedQuote =
-                  MovieQuoteDocumentManager.instance.latesMovieQuote!.quote;
-              final justDeleteMovie =
-                  MovieQuoteDocumentManager.instance.latesMovieQuote!.movie;
+          Visibility(
+            visible: showEditeDelete,
+            child: IconButton(
+              onPressed: () {
+                final justDeletedQuote =
+                    MovieQuoteDocumentManager.instance.latesMovieQuote!.quote;
+                final justDeleteMovie =
+                    MovieQuoteDocumentManager.instance.latesMovieQuote!.movie;
 
-              MovieQuoteDocumentManager.instance.delete();
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: const Text('Quote Deleted'),
-                  action: SnackBarAction(
-                    label: 'Undo',
-                    onPressed: () {
-                      MovieQuotesCollectionManager.instance.add(
-                        quote: justDeletedQuote,
-                        movie: justDeleteMovie,
-                      );
-                      print("TODO: Figure out UNDO");
-                    },
+                MovieQuoteDocumentManager.instance.delete();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: const Text('Quote Deleted'),
+                    action: SnackBarAction(
+                      label: 'Undo',
+                      onPressed: () {
+                        MovieQuotesCollectionManager.instance.add(
+                          quote: justDeletedQuote,
+                          movie: justDeleteMovie,
+                        );
+                        print("TODO: Figure out UNDO");
+                      },
+                    ),
                   ),
-                ),
-              );
-              Navigator.pop(context);
-            },
-            icon: const Icon(Icons.delete),
+                );
+                Navigator.pop(context);
+              },
+              icon: const Icon(Icons.delete),
+            ),
           ),
           const SizedBox(
             width: 40.0,
@@ -166,17 +179,6 @@ class _MovieQuoteDetailPageState extends State<MovieQuoteDetailPage> {
               child: const Text('Update'),
               onPressed: () {
                 setState(() {
-                  // TODO: Figure out update in the Firestore
-
-                  // widget.mq.quote = quoteTextController.text;
-                  // widget.mq.movie = movieTextController.text;
-
-                  // quotes.add(
-                  //   MovieQuote(
-                  //     quote: quoteTextController.text,
-                  //     movie: movieTextController.text,
-                  //   ),
-                  // );
                   MovieQuoteDocumentManager.instance.update(
                     movie: movieTextController.text,
                     quote: quoteTextController.text,
@@ -234,7 +236,6 @@ class LabelledTextDisplay extends StatelessWidget {
                       content,
                       style: const TextStyle(
                         fontSize: 18.0,
-                        // fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
