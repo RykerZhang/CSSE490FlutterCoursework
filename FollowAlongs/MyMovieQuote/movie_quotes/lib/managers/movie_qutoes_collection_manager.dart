@@ -48,4 +48,14 @@ class MovieQuotesCollectionManager {
         .then((DocumentReference docRef) => print("MovieQuote add with id"))
         .catchError((error) => print("Failed to add user: $error"));
   }
+
+  Query<MovieQuote> get allMovieQuotesQuery => _ref
+      .orderBy(kMovieQuote_lastTouched, descending: true)
+      .withConverter<MovieQuote>(
+        fromFirestore: (snapshot, _) => MovieQuote.from(snapshot),
+        toFirestore: (mq, _) => mq.toMap(),
+      );
+
+  Query<MovieQuote> get mineONlyMovieQuotesQuery => allMovieQuotesQuery
+      .where(kMovieQuote_authorUid, isEqualTo: AuthManager.instance.uid);
 }

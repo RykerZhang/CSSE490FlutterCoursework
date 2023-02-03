@@ -2,7 +2,6 @@ import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
-
 import '../models/auth_manager.dart';
 
 class EmailPasswordAuthPage extends StatefulWidget {
@@ -26,8 +25,7 @@ class _EmailPasswordAuthPageState extends State<EmailPasswordAuthPage> {
   @override
   void initState() {
     _loginObserverKey = AuthManager.instance.addLoginObserver(() {
-      print("EmailPassword page: Log in observed.  TODO: pop this page!");
-      Navigator.of(context).popUntil(((route) => route.isFirst));
+      Navigator.of(context).popUntil((route) => route.isFirst);
     });
     super.initState();
   }

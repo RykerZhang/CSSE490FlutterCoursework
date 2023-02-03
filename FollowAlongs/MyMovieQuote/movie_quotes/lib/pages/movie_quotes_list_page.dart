@@ -1,9 +1,11 @@
 import 'dart:async';
 
+import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:movie_quotes/components/list_page_side_drawer.dart';
 import 'package:movie_quotes/components/movie_quote_row_component.dart';
 import 'package:movie_quotes/models/movie_quote.dart';
+
 import '../managers/movie_qutoes_collection_manager.dart';
 import '../models/auth_manager.dart';
 import 'login_front_page.dart';
@@ -17,11 +19,12 @@ class MovieQuotesListPage extends StatefulWidget {
 }
 
 class _MovieQuotesListPageState extends State<MovieQuotesListPage> {
-  final quotes = <MovieQuote>[]; // Later we will remove this and use Firestore
+  // final quotes = <MovieQuote>[]; // Later we will remove this and use Firestore
   final quoteTextController = TextEditingController();
   final movieTextController = TextEditingController();
 
-  StreamSubscription? movieQuotesSubscription;
+  // StreamSubscription? movieQuotesSubscription;
+  bool _isShowingAllQuotes = true;
 
   UniqueKey? _loginObserverKey;
   UniqueKey? _logoutObserverKey;
@@ -30,49 +33,51 @@ class _MovieQuotesListPageState extends State<MovieQuotesListPage> {
   void initState() {
     super.initState();
 
-    _loginObserverKey = AuthManager.instance.addLoginObserver(() {
-      movieQuotesSubscription =
-          MovieQuotesCollectionManager.instance.startListening(() {
-        setState(() {});
-      });
+    _showAllQuotes();
 
+    _loginObserverKey = AuthManager.instance.addLoginObserver(() {
       setState(() {});
     });
 
     _logoutObserverKey = AuthManager.instance.addLogoutObserver(() {
+      _showAllQuotes();
       setState(() {});
     });
   }
 
   void _showAllQuotes() {
-    MovieQuotesCollectionManager.instance
-        .stopListening(movieQuotesSubscription);
-    movieQuotesSubscription =
-        MovieQuotesCollectionManager.instance.startListening(
-      () {
-        setState(() {});
-      },
-    );
+    setState(() {
+      _isShowingAllQuotes = true;
+    });
+    // MovieQuotesCollectionManager.instance
+    //     .stopListening(movieQuotesSubscription); // Just in case.
+    // movieQuotesSubscription =
+    //     MovieQuotesCollectionManager.instance.startListening(() {
+    //   setState(() {});
+    // });
   }
 
   void _showOnlyMyQuotes() {
-    MovieQuotesCollectionManager.instance
-        .stopListening(movieQuotesSubscription);
-    movieQuotesSubscription =
-        MovieQuotesCollectionManager.instance.startListening(
-      () {
-        setState(() {});
-      },
-      isFilteredForMine: true,
-    );
+    setState(() {
+      _isShowingAllQuotes = false;
+    });
+    // MovieQuotesCollectionManager.instance
+    //     .stopListening(movieQuotesSubscription); // Just in case.
+    // movieQuotesSubscription =
+    //     MovieQuotesCollectionManager.instance.startListening(
+    //   () {
+    //     setState(() {});
+    //   },
+    //   isFilteredForMine: true,
+    // );
   }
 
   @override
   void dispose() {
     quoteTextController.dispose();
     movieTextController.dispose();
-    MovieQuotesCollectionManager.instance
-        .stopListening(movieQuotesSubscription);
+    // MovieQuotesCollectionManager.instance
+    //     .stopListening(movieQuotesSubscription);
     AuthManager.instance.removeObserver(_loginObserverKey);
     AuthManager.instance.removeObserver(_logoutObserverKey);
     super.dispose();
@@ -80,26 +85,26 @@ class _MovieQuotesListPageState extends State<MovieQuotesListPage> {
 
   @override
   Widget build(BuildContext context) {
-    final List<MovieQuoteRow> movieRows =
-        MovieQuotesCollectionManager.instance.latestMovieQuotes
-            .map((mq) => MovieQuoteRow(
-                  movieQuote: mq,
-                  onTap: () async {
-                    print(
-                        "You clicked on the movie quote ${mq.quote} - ${mq.movie}");
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (BuildContext context) {
-                          return MovieQuoteDetailPage(
-                              mq.documentId!); // In Firebase use a documentId
-                        },
-                      ),
-                    );
-                    setState(() {});
-                  },
-                ))
-            .toList();
+    // final List<MovieQuoteRow> movieRows =
+    // MovieQuotesCollectionManager.instance.latestMovieQuotes
+    //     .map((mq) => MovieQuoteRow(
+    //           movieQuote: mq,
+    //           onTap: () async {
+    //             print(
+    //                 "You clicked on the movie quote ${mq.quote} - ${mq.movie}");
+    //             await Navigator.push(
+    //               context,
+    //               MaterialPageRoute(
+    //                 builder: (BuildContext context) {
+    //                   return MovieQuoteDetailPage(
+    //                       mq.documentId!); // In Firebase use a documentId
+    //                 },
+    //               ),
+    //             );
+    //             setState(() {});
+    //           },
+    //         ))
+    //     .toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -121,8 +126,32 @@ class _MovieQuotesListPageState extends State<MovieQuotesListPage> {
               ],
       ),
       backgroundColor: Colors.grey[100],
-      body: ListView(
-        children: movieRows,
+      // body: ListView(
+      //   children: movieRows,
+      // ),
+      body: FirestoreListView<MovieQuote>(
+        query: _isShowingAllQuotes
+            ? MovieQuotesCollectionManager.instance.allMovieQuotesQuery
+            : MovieQuotesCollectionManager.instance.mineONlyMovieQuotesQuery,
+        itemBuilder: (context, snapshot) {
+          MovieQuote mq = snapshot.data();
+          return MovieQuoteRow(
+            movieQuote: mq,
+            onTap: () async {
+              print("You clicked on the movie quote ${mq.quote} - ${mq.movie}");
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (BuildContext context) {
+                    return MovieQuoteDetailPage(
+                        mq.documentId!); // In Firebase use a documentId
+                  },
+                ),
+              );
+              setState(() {});
+            },
+          );
+        },
       ),
       drawer: AuthManager.instance.isSignedIn
           ? ListPageSideDrawer(
