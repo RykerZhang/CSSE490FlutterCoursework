@@ -22,7 +22,7 @@ class ListPageSideDrawer extends StatelessWidget {
         children: [
           const DrawerHeader(
             decoration: BoxDecoration(
-              color: Colors.blue,
+              color: Colors.red,
             ),
             child: Text('Movie Quote',
                 style: TextStyle(

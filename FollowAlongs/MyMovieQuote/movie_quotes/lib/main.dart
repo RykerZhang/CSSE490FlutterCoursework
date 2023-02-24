@@ -13,7 +13,7 @@ void main() async {
     EmailAuthProvider(),
     GoogleProvider(
         clientId:
-            "241570666356-6iov3qjio5gqetunhk1ma5ilhqbf8vd8.apps.googleusercontent.com"),
+            "1042379090777-9vabisr0a9rsqjdmglranh0b1l1fbgv3.apps.googleusercontent.com"),
   ]);
   runApp(const MyApp());
 }
