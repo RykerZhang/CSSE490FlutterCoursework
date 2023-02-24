@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'package:cube_transition/cube_transition.dart';
 
 void main() {
   runApp(const MyApp());
